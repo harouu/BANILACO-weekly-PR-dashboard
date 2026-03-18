@@ -56,14 +56,14 @@ body{background:var(--bg);color:var(--text-body);font-family:'Noto Sans KR',sans
 .card-title{font-size:11px;font-weight:700;color:var(--text-muted);letter-spacing:.1em;text-transform:uppercase;display:flex;align-items:center;gap:8px;}
 .card-title-icon{width:20px;height:20px;border-radius:5px;background:var(--bg-soft);display:flex;align-items:center;justify-content:center;font-size:11px;}
 .card-body{padding:0 24px 22px;}
-.row-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:20px;}
+.row-2col{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px;}
 
-@media(max-width:960px){.row-3{grid-template-columns:1fr;}}
-.insight-item{display:flex;gap:12px;align-items:flex-start;padding:10px 0;border-bottom:1px solid var(--bg-soft);}
-.insight-item:last-child{border-bottom:none;padding-bottom:0;}
-.insight-bullet{width:6px;height:6px;border-radius:50%;background:var(--jasa);margin-top:9px;flex-shrink:0;}
-.insight-text{font-size:13px;color:var(--text-body);line-height:1.65;}
-.insight-text strong{color:var(--text-title);font-weight:600;}
+@media(max-width:960px){.row-2col{grid-template-columns:1fr;}}
+
+
+
+
+
 .kw-cloud{display:flex;flex-direction:column;gap:8px;}
 .kw-group{display:flex;flex-direction:column;gap:0;}
 .kw-item{display:flex;align-items:center;gap:8px;padding:8px 12px;border-radius:8px;background:var(--bg-soft);transition:background .15s;}
@@ -170,11 +170,7 @@ tbody tr:hover td{background:#FAFAF8;}
   <div class="summary-bar" id="summaryBar"></div>
   <div class="kpi-grid" id="kpiGrid"></div>
 
-  <div class="row-3">
-    <div class="card">
-      <div class="card-header"><div class="card-title"><div class="card-title-icon">💡</div>핵심 인사이트</div></div>
-      <div class="card-body" id="insightBody"></div>
-    </div>
+  <div class="row-2col">
     <div class="card">
       <div class="card-header"><div class="card-title"><div class="card-title-icon">🏷</div>자사 기사 키워드</div></div>
       <div class="card-body" id="jasaKeywords"></div>
@@ -439,25 +435,6 @@ function renderKPI(){
   }).join('');
 }
 
-function renderInsights(){
-  const data=getFiltered();
-  if(!data.length){document.getElementById('insightBody').innerHTML='<div class="empty-state"><p>데이터 없음</p></div>';return;}
-  const cnt={};CATEGORIES.forEach(c=>cnt[c]=data.filter(d=>d.카테고리===c).length);
-  const topCat=Object.entries(cnt).sort((a,b)=>b[1]-a[1])[0];
-  const channels=groupBy(data,d=>d.채널),topCh=Object.entries(channels).sort((a,b)=>b[1].length-a[1].length)[0];
-  const ms=getMonthSrc(),mt=ms.length,jp=mt?Math.round(ms.filter(d=>d.카테고리==='자사').length/mt*100):0;
-  const w1=RAW_DATA.filter(d=>d.주차==='1주차').length,w2=RAW_DATA.filter(d=>d.주차==='2주차').length;
-  const items=[
-    {t:`<strong>${topCat[0]}</strong> 기사가 <strong>${topCat[1]}건</strong>으로 이번 기간 가장 많습니다.`},
-    {t:`주요 채널은 <strong>${topCh[0]}</strong>으로 <strong>${topCh[1].length}건</strong> 집계되었습니다.`},
-    {t:`이번 달 자사 기사 비중은 전체의 <strong>${jp}%</strong>를 차지합니다.`},
-    {t:`주차별 기사 수: 1주차 <strong>${w1}건</strong> → 2주차 <strong>${w2}건</strong> (${w2>w1?'▲ 증가':'▼ 감소'} ${Math.abs(w2-w1)}건)`},
-  ];
-  document.getElementById('insightBody').innerHTML=items.map(i=>`<div class="insight-item"><div class="insight-bullet"></div><div class="insight-text">${i.t}</div></div>`).join('');
-}
-
-
-
 function renderCatFilter(){
   const cats=['전체',...CATEGORIES];
   document.getElementById('catFilter').innerHTML=cats.map(c=>{const cl=c==='전체'?'all':(CAT_CLASS[c]||'');return `<button class="cat-btn ${selCat===c?'active '+cl:''}" onclick="setCat('${c}')">${c==='전체'?'전체':(CAT_ICON[c]||'')+' '+c}</button>`;}).join('');
@@ -555,7 +532,7 @@ function setMonth(m){selMonth=m;selWeek='all';curPage=1;renderAll();}
 function setWeek(w){selWeek=w;curPage=1;renderAll();}
 function setCat(c){selCat=c;curPage=1;renderCatFilter();renderArticles();}
 function goPage(p){curPage=p;renderArticles();}
-function renderAll(){renderTabs();renderSummary();renderKPI();renderInsights();renderKeywords();renderCatFilter();renderArticles();}
+function renderAll(){renderTabs();renderSummary();renderKPI();renderKeywords();renderCatFilter();renderArticles();}
 
 document.getElementById('headerDate').textContent=new Date().toLocaleDateString('ko-KR',{year:'numeric',month:'long',day:'numeric',weekday:'long'});
 renderAll();
