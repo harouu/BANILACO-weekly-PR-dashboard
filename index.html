@@ -266,7 +266,7 @@ const JASA_GROUPS=[
       {label:'클린 잇 제로 망그러진 곰 콜라보 에디션', tests:[/망그러진 곰|망곰|클린 잇 제로.*에디션|클린잇제로.*망/]},
       {label:'에스테픽 콜라겐 7X 마스크 완판·리오더', tests:[/에스테픽|콜라겐 7X|리오더/]},
       {label:'컬리 스튜디오 노 글루 아이래쉬 출시', tests:[/노 글루 아이래쉬|컬리 스튜디오/]},
-      {label:'프라임 프라이머 4년 만에 전면 리뉴얼', tests:[/프라임 프라이머.*리뉴얼|프라임 프라이머.*전면/]},
+      {label:'프라임 프라이머 4년 만에 전면 리뉴얼', tests:[/프라임 프라이머.*리뉴얼|프라임 프라이머.*전면/], periodCount:{'4월_2주차':13}},
       {label:'커버리셔스 얼티밋 화이트 쿠션 리뉴얼 출시', tests:[/화이트 쿠션|얼티밋 화이트 쿠션|커버리셔스/]},
     ]
   },
@@ -407,10 +407,20 @@ function buildGroups(articles, groupDefs) {
     for (const item of gd.items) {
       // fixedCount가 지정된 경우 해당 값 우선 사용 (실제 원본 데이터 기준 수동 확인 값)
       // 단, fixedCount 항목도 현재 필터 기사에서 1건 이상 실제 매칭될 때만 표시
+      // periodCount: {월_주차: count} 형태로 특정 기간에만 고정값 사용
       const actualMatch = articles.filter(a => item.tests.some(re => { re.lastIndex=0; return re.test(a.기사제목); })).length;
-      const cnt = (item.fixedCount !== undefined && actualMatch > 0)
-        ? item.fixedCount
-        : actualMatch;
+      let cnt = actualMatch;
+      if (item.periodCount !== undefined) {
+        const periodKey = selMonth === 'all' ? null : (selWeek === 'all' ? `${selMonth}월` : `${selMonth}월_${selWeek}`);
+        if (periodKey && item.periodCount[periodKey] !== undefined && actualMatch > 0) {
+          cnt = item.periodCount[periodKey];
+        } else if (!periodKey) {
+          // 전체 선택 시: 실제 매칭값 사용
+          cnt = actualMatch;
+        }
+      } else if (item.fixedCount !== undefined && actualMatch > 0) {
+        cnt = item.fixedCount;
+      }
       if (cnt > 0) matchedItems.push({ label: item.label, count: cnt });
     }
     if (!matchedItems.length) continue;
